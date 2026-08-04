@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "organization": "hacker-house-medellin",
+  "services": [
+    "hhm-api",
+    "hhm-mash-web",
+    "hhm-leptos-web",
+    "hhm-dioxus-web",
+    "hhm-sync"
+  ]
+}
