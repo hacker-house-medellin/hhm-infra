@@ -1,32 +1,17 @@
 name: CI
-
 on:
   pull_request:
   push:
     branches: [main]
-
 permissions:
   contents: read
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  validate:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+  contracts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-      - name: Validate JSON and shell
-        run: |
-          python3 -m json.tool catalog/services.json >/dev/null
-          bash -n scripts/*.sh
-      - name: Validate Kubernetes resources
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          for path in Path('k8s').rglob('*.yaml'):
-              text = path.read_text()
-              assert 'apiVersion:' in text and 'kind:' in text, path
-          PY
+        with:
+          persist-credentials: false
+      - run: python3 scripts/verify_repo.py
+      - run: node --test

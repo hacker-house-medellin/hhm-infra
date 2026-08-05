@@ -1,0 +1,4 @@
+name = "hhm-infra"
+main = "src/index.js"
+compatibility_date = "2026-08-04"
+workers_dev = false
