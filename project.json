@@ -1,0 +1,18 @@
+{
+  "bootstrap_date": "20260804",
+  "kind": "infra",
+  "organization": "hacker-house-medellin",
+  "repository": "hhm-infra",
+  "required_paths": [
+    ".github/workflows/ci.yml",
+    ".gitignore",
+    "package.json",
+    "scripts/verify_repo.py",
+    "src/index.js",
+    "tests/worker.test.mjs",
+    "wrangler.toml"
+  ],
+  "schema_version": 1,
+  "tracking_issue": "DEN-1950",
+  "visibility": "public"
+}
