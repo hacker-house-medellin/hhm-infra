@@ -30,3 +30,7 @@ observability, backups, incident response, dependency review, and secret managem
             ./scripts/validate.sh
             docker compose up
             ```
+
+## Cloudflare Worker edge gateway
+
+The `cloudflare-worker/` package provides a Wrangler-managed edge gateway with health checks, signed webhook intake, validation, queue fan-out, security headers, unit tests, and a dry-run deployment command. The Worker is intentionally isolated from cluster infrastructure so it can be reviewed and deployed independently.

@@ -1,0 +1,22 @@
+name = "hhm-edge"
+main = "src/index.mjs"
+compatibility_date = "2026-08-04"
+workers_dev = true
+
+[vars]
+PRODUCT_ORG = "hacker-house-medellin"
+PRODUCT_NAME = "Hacker House Medellín"
+CORS_ORIGIN = "*"
+
+# Production bindings are intentionally placeholders. Create resources and replace IDs/names before deploy.
+# [[kv_namespaces]]
+# binding = "STATE_KV"
+# id = "replace-me"
+#
+# [[queues.producers]]
+# binding = "EVENT_QUEUE"
+# queue = "hhm-events"
+#
+# [[queues.producers]]
+# binding = "ALERT_QUEUE"
+# queue = "hhm-alerts"
