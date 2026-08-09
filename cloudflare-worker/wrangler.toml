@@ -6,9 +6,16 @@ workers_dev = true
 [vars]
 PRODUCT_ORG = "hacker-house-medellin"
 PRODUCT_NAME = "Hacker House Medellín"
-CORS_ORIGIN = "*"
+# Comma-separated exact origins. Wildcard origins are deliberately ignored.
+CORS_ORIGINS = ""
+SIGNATURE_MAX_AGE_SECONDS = "300"
 
-# Production bindings are intentionally placeholders. Create resources and replace IDs/names before deploy.
+# WEBHOOK_SECRET is required for every write endpoint. Store it with
+# `wrangler secret put WEBHOOK_SECRET`; never add it to this file.
+#
+# STATE_KV and EVENT_QUEUE are required before /readyz reports success or a
+# write is accepted. ALERT_QUEUE is optional and falls back to EVENT_QUEUE.
+# Create the resources, then replace the placeholders below before deploy.
 # [[kv_namespaces]]
 # binding = "STATE_KV"
 # id = "replace-me"
