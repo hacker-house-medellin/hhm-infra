@@ -18,3 +18,12 @@ Kubernetes, Argo CD, observability, and bounded Cloudflare Worker edge code for 
 - `hacker-house-medellin-monorepo`
 
 Interfaces own wire formats; libraries own reusable domain behavior; clients consume versioned contracts; runtimes own deployment behavior; monorepos coordinate pinned revisions. Edge code is allowlisted and never a generic proxy.
+
+## Production edge
+
+The `hhaus.org` hostname contract is versioned in
+`routing/hhaus-hosts.json`. Public product traffic and operator traffic use
+separate outbound Cloudflare Tunnels, gateways, credentials, and network
+policies. The operator plane additionally requires default-deny Cloudflare
+Access policies and a dedicated Shared Auth realm. See
+`docs/hhaus-routing.md` for the deployment and evidence gates.

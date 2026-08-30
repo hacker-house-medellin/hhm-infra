@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hhm-edge
+  labels:
+    kubernetes.io/metadata.name: hhm-edge
+    app.kubernetes.io/name: hhm-edge

@@ -1,0 +1,181 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: hhm-edge
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: tunnel-dns-and-cloudflare-egress
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: [hhm-public-tunnel, hhm-admin-tunnel]
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+      ports:
+        - { protocol: TCP, port: 443 }
+        - { protocol: TCP, port: 7844 }
+        - { protocol: UDP, port: 7844 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: public-tunnel-to-public-gateway
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-public-gateway
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-public-tunnel
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: admin-tunnel-to-admin-gateway
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-admin-gateway
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-admin-tunnel
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: public-tunnel-to-public-gateway-egress
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-public-tunnel
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-public-gateway
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: admin-tunnel-to-admin-gateway-egress
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-admin-tunnel
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-admin-gateway
+      ports:
+        - { protocol: TCP, port: 8080 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: gateway-dns-egress
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values: [hhm-public-gateway, hhm-admin-gateway]
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - { protocol: UDP, port: 53 }
+        - { protocol: TCP, port: 53 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: public-gateway-upstreams
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-public-gateway
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: hhm
+      ports:
+        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 8080 }
+        - { protocol: TCP, port: 8081 }
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: shared-auth
+      ports:
+        - { protocol: TCP, port: 8120 }
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: admin-gateway-upstreams
+  namespace: hhm-edge
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-admin-gateway
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: hhm-admin
+      ports:
+        - { protocol: TCP, port: 80 }
+        - { protocol: TCP, port: 8787 }
+        - { protocol: TCP, port: 8788 }

@@ -6,7 +6,15 @@ Initialized through `DEN-1950` as a testable `infra` foundation. Product behavio
 
 ```bash
 python3 scripts/verify_repo.py
+python3 scripts/validate_routing.py
+./scripts/validate.sh
 ```
+
+The production hostname and trust-plane contract lives in
+[`routing/hhaus-hosts.json`](routing/hhaus-hosts.json). The separately isolated
+public and admin Cloudflare Tunnel gateways live in [`k8s/edge`](k8s/edge) and
+remain fail-closed until the release gates in
+[`docs/hhaus-routing.md`](docs/hhaus-routing.md) are satisfied.
 
 ## Environment secrets
 

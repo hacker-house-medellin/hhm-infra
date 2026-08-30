@@ -1,0 +1,175 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hhm-public-gateway
+  namespace: hhm-edge
+data:
+  nginx.conf: |
+    worker_processes auto;
+    pid /tmp/nginx.pid;
+    error_log /dev/stderr notice;
+
+    events {
+      worker_connections 1024;
+    }
+
+    http {
+      access_log /dev/stdout;
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Host $host;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+      proxy_set_header X-Request-ID $http_cf_ray;
+      proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+      server_tokens off;
+
+      server {
+        listen 8080;
+        server_name user.hhaus.org;
+
+        location = /gateway-healthz { return 200 "ok\n"; }
+
+        location = /shared-auth-ui/ {
+          proxy_set_header X-Forwarded-Prefix /shared-auth-ui;
+          proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/;
+        }
+        location = /shared-auth-ui/ui {
+          proxy_set_header X-Forwarded-Prefix /shared-auth-ui;
+          proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/ui;
+        }
+        location = /shared-auth-ui/auth/browser/sign-in {
+          proxy_set_header X-Forwarded-Prefix /shared-auth-ui;
+          proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/auth/browser/sign-in;
+        }
+        location = /shared-auth-ui/auth/browser/consume {
+          proxy_set_header X-Forwarded-Prefix /shared-auth-ui;
+          proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/auth/browser/consume;
+        }
+        location = /shared-auth-ui/auth/browser/otp {
+          proxy_set_header X-Forwarded-Prefix /shared-auth-ui;
+          proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/auth/browser/otp;
+        }
+        location ^~ /shared-auth-ui/ { return 404; }
+
+        location / {
+          proxy_pass http://hhm-mash-web.hhm.svc.cluster.local;
+        }
+      }
+
+      server {
+        listen 8080;
+        server_name auth.hhaus.org;
+
+        location = /gateway-healthz { return 200 "ok\n"; }
+        location = / { proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/; }
+        location = /ui { proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/ui; }
+        location = /auth/browser/sign-in { proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/auth/browser/sign-in; }
+        location = /auth/browser/consume { proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/auth/browser/consume; }
+        location = /auth/browser/otp { proxy_pass http://dd-shared-auth.shared-auth.svc.cluster.local:8120/auth/browser/otp; }
+        location / { return 404; }
+      }
+
+      server {
+        listen 8080;
+        server_name api.hhaus.org;
+
+        location = /gateway-healthz { return 200 "ok\n"; }
+        location / { proxy_pass http://hhm-api.hhm.svc.cluster.local; }
+      }
+
+      server {
+        listen 8080 default_server;
+        server_name _;
+        return 421;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hhm-public-gateway
+  namespace: hhm-edge
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-public-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhm-public-gateway
+        hhm.edge/plane: public
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          image: docker.io/nginxinc/nginx-unprivileged:1.29.1-alpine@sha256:27985295bdb22a1ef8f712863210bd5877c0f3006494a593e86b3fe0fa55467e
+          args: ["-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /gateway-healthz
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: user.hhaus.org
+          livenessProbe:
+            httpGet:
+              path: /gateway-healthz
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: user.hhaus.org
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-public-gateway
+      volumes:
+        - name: config
+          configMap:
+            name: hhm-public-gateway
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hhm-public-gateway
+  namespace: hhm-edge
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: hhm-public-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
