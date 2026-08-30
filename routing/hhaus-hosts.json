@@ -27,8 +27,11 @@
     {
       "hostname": "medellin.hhaus.org",
       "purpose": "location-marketing-alias",
-      "edge": "cloudflare-redirect-to-apex",
-      "state": "live"
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "routes": [
+        "https://hhaus.org/locations/medellin/"
+      ]
     },
     {
       "hostname": "user.hhaus.org",

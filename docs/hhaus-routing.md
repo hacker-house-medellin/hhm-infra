@@ -77,4 +77,6 @@ cluster edge gateway.
    and tunnel IDs, DNS answers, and production request IDs as separate evidence.
 
 If any gate is unavailable, leave the five cluster hostname records absent.
-The marketing apex and Medellín alias are independent of these cluster gates.
+The global marketing apex and the exact-city redirect from
+`medellin.hhaus.org` to `hhaus.org/locations/medellin/` are independent of
+these cluster gates.
