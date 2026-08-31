@@ -53,7 +53,7 @@ data:
         location ^~ /shared-auth-ui/ { return 404; }
 
         location / {
-          proxy_pass http://hhm-mash-web.hhm.svc.cluster.local;
+          proxy_pass http://hhm-web.hhm.svc.cluster.local:8081;
         }
       }
 
@@ -75,7 +75,7 @@ data:
         server_name api.hhaus.org;
 
         location = /gateway-healthz { return 200 "ok\n"; }
-        location / { proxy_pass http://hhm-api.hhm.svc.cluster.local; }
+        location / { proxy_pass http://hhm-api.hhm.svc.cluster.local:8080; }
       }
 
       server {

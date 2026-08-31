@@ -37,7 +37,7 @@
       "hostname": "user.hhaus.org",
       "purpose": "authenticated-user-intake-and-referrals",
       "edge": "hhm-public-tunnel",
-      "upstream": "http://hhm-mash-web.hhm.svc.cluster.local",
+      "upstream": "http://hhm-web.hhm.svc.cluster.local:8081",
       "state": "gated",
       "routes": [
         "/submit-pre-interest",
@@ -70,7 +70,7 @@
       "hostname": "api.hhaus.org",
       "purpose": "public-intake-api",
       "edge": "hhm-public-tunnel",
-      "upstream": "http://hhm-api.hhm.svc.cluster.local",
+      "upstream": "http://hhm-api.hhm.svc.cluster.local:8080",
       "state": "gated"
     },
     {

@@ -7,9 +7,11 @@ or `Ingress`: both planes establish outbound Cloudflare Tunnel connections.
 ## Trust planes
 
 The public connector may reach only the public gateway. That gateway serves
-`user.hhaus.org`, `api.hhaus.org`, and exactly five browser-safe Shared Auth
-routes on `auth.hhaus.org`. The same five routes are available under the
-same-origin `/shared-auth-ui` prefix on `user.hhaus.org`. Delegation,
+`user.hhaus.org` through the canonical Rust `hhm-web` Service on port 8081,
+`api.hhaus.org` through the canonical Rust `hhm-api` Service on port 8080, and
+exactly five browser-safe Shared Auth routes on `auth.hhaus.org`. The same five
+routes are available under the same-origin `/shared-auth-ui` prefix on
+`user.hhaus.org`. Delegation,
 introspection, exchange, metrics, and every other Shared Auth path return 404 at
 the gateway.
 

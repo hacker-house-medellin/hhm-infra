@@ -32,6 +32,10 @@ if by_host["admin.hhaus.org"].get("upstream") != "http://admin-web.hhm-admin.svc
     raise SystemExit("admin web upstream must match the deployed Service name and port")
 if by_host["admin-api.hhaus.org"].get("upstream") != "http://admin-api.hhm-admin.svc.cluster.local:8080":
     raise SystemExit("admin API upstream must match the deployed Service name and port")
+if by_host["user.hhaus.org"].get("upstream") != "http://hhm-web.hhm.svc.cluster.local:8081":
+    raise SystemExit("user web upstream must match the canonical Rust Service name and port")
+if by_host["api.hhaus.org"].get("upstream") != "http://hhm-api.hhm.svc.cluster.local:8080":
+    raise SystemExit("public API upstream must match the canonical Rust Service name and port")
 
 expected_auth_routes = {
     "/",
@@ -65,6 +69,12 @@ for required in (
         raise SystemExit(f"missing edge invariant: {required}")
 
 public_config = (ROOT / "k8s/edge/public-gateway.yaml").read_text()
+for required_upstream in (
+    "proxy_pass http://hhm-web.hhm.svc.cluster.local:8081;",
+    "proxy_pass http://hhm-api.hhm.svc.cluster.local:8080;",
+):
+    if required_upstream not in public_config:
+        raise SystemExit(f"canonical runtime upstream missing from gateway: {required_upstream}")
 for route in expected_auth_routes - {"/"}:
     if f"location = {route}" not in public_config:
         raise SystemExit(f"auth allowlist route missing from gateway: {route}")

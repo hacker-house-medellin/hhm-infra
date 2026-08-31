@@ -28,6 +28,14 @@ test("admin and public traffic use distinct fail-closed planes", () => {
     hosts.get("admin-api.hhaus.org").upstream,
     "http://admin-api.hhm-admin.svc.cluster.local:8080",
   );
+  assert.equal(
+    hosts.get("user.hhaus.org").upstream,
+    "http://hhm-web.hhm.svc.cluster.local:8081",
+  );
+  assert.equal(
+    hosts.get("api.hhaus.org").upstream,
+    "http://hhm-api.hhm.svc.cluster.local:8080",
+  );
 });
 
 test("Shared Auth exposes only the browser ceremony", () => {
