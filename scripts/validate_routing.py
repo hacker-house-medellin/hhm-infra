@@ -28,6 +28,10 @@ if not by_host["admin.hhaus.org"].get("cloudflare_access"):
     raise SystemExit("admin web must declare Cloudflare Access")
 if not by_host["admin-api.hhaus.org"].get("cloudflare_access"):
     raise SystemExit("admin API must declare Cloudflare Access")
+if by_host["admin.hhaus.org"].get("upstream") != "http://admin-web.hhm-admin.svc.cluster.local:8080":
+    raise SystemExit("admin web upstream must match the deployed Service name and port")
+if by_host["admin-api.hhaus.org"].get("upstream") != "http://admin-api.hhm-admin.svc.cluster.local:8080":
+    raise SystemExit("admin API upstream must match the deployed Service name and port")
 
 expected_auth_routes = {
     "/",

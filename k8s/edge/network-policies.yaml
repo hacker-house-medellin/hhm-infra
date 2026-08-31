@@ -176,6 +176,4 @@ spec:
             matchLabels:
               kubernetes.io/metadata.name: hhm-admin
       ports:
-        - { protocol: TCP, port: 80 }
-        - { protocol: TCP, port: 8787 }
-        - { protocol: TCP, port: 8788 }
+        - { protocol: TCP, port: 8080 }

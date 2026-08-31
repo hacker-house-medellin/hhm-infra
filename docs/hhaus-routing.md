@@ -18,6 +18,10 @@ The admin connector has a distinct token, Deployment, gateway, and NetworkPolicy
 `admin-api.hhaus.org` must have a service-token policy. Both applications must
 end with a default-deny policy. Cloudflare Access is an outer boundary, not a
 replacement for the admin servers' dedicated Shared Auth realm and role checks.
+The gateway resolves the admin repositories' exact Kubernetes Services,
+`admin-web.hhm-admin.svc.cluster.local:8080` and
+`admin-api.hhm-admin.svc.cluster.local:8080`; those Services must explicitly
+allow ingress from the `hhm-edge` admin gateway pod.
 
 ## Secret-manager inputs
 

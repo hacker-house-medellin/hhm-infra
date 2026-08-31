@@ -12,6 +12,14 @@ test("admin and public traffic use distinct fail-closed planes", () => {
   assert.notEqual(hosts.get("admin.hhaus.org").edge, hosts.get("user.hhaus.org").edge);
   assert.match(hosts.get("admin.hhaus.org").cloudflare_access, /default-deny/);
   assert.match(hosts.get("admin-api.hhaus.org").cloudflare_access, /default-deny/);
+  assert.equal(
+    hosts.get("admin.hhaus.org").upstream,
+    "http://admin-web.hhm-admin.svc.cluster.local:8080",
+  );
+  assert.equal(
+    hosts.get("admin-api.hhaus.org").upstream,
+    "http://admin-api.hhm-admin.svc.cluster.local:8080",
+  );
 });
 
 test("Shared Auth exposes only the browser ceremony", () => {

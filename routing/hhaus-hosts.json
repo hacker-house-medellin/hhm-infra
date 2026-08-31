@@ -77,7 +77,7 @@
       "hostname": "admin.hhaus.org",
       "purpose": "operator-web",
       "edge": "hhm-admin-tunnel",
-      "upstream": "http://hhm-admin-web.hhm-admin.svc.cluster.local",
+      "upstream": "http://admin-web.hhm-admin.svc.cluster.local:8080",
       "cloudflare_access": "interactive-sso-mfa-default-deny",
       "state": "gated"
     },
@@ -85,7 +85,7 @@
       "hostname": "admin-api.hhaus.org",
       "purpose": "operator-api",
       "edge": "hhm-admin-tunnel",
-      "upstream": "http://hhm-admin-api.hhm-admin.svc.cluster.local",
+      "upstream": "http://admin-api.hhm-admin.svc.cluster.local:8080",
       "cloudflare_access": "service-token-default-deny",
       "state": "gated"
     }

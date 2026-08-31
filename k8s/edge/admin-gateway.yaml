@@ -30,14 +30,14 @@ data:
         listen 8080;
         server_name admin.hhaus.org;
         location = /gateway-healthz { return 200 "ok\n"; }
-        location / { proxy_pass http://hhm-admin-web.hhm-admin.svc.cluster.local; }
+        location / { proxy_pass http://admin-web.hhm-admin.svc.cluster.local:8080; }
       }
 
       server {
         listen 8080;
         server_name admin-api.hhaus.org;
         location = /gateway-healthz { return 200 "ok\n"; }
-        location / { proxy_pass http://hhm-admin-api.hhm-admin.svc.cluster.local; }
+        location / { proxy_pass http://admin-api.hhm-admin.svc.cluster.local:8080; }
       }
 
       server {
