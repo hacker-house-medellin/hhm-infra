@@ -38,6 +38,10 @@ Cloudflare DNS comments:
 | `hhm/prod/api-runtime` | `DATABASE_URL`, `SUPABASE_DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TURNSTILE_SECRET_KEY`, `SHARED_AUTH_SERVICE_CREDENTIAL` | `hhm-api` |
 | `hhm/prod/user-web-runtime` | `READ_DATABASE_URL` | `hhm-web` |
 | `hhm/prod/ghcr-pull` | `dockerconfigjson` | public runtime image pulls |
+| `hhm/prod/admin-web-runtime` | keys named by the admin web deployment contract | `admin-web` |
+| `hhm/prod/admin-api-runtime` | keys named by the admin API deployment contract | `admin-api` |
+| `hhm/prod/admin-action-worker-runtime` | isolated admin and product worker database identities | `admin-action-worker` |
+| `hhm/prod/admin-ghcr-pull` | `dockerconfigjson` | admin runtime image pulls only |
 
 The `ExternalSecret` objects read them through the existing
 `ClusterSecretStore/dd-cluster-secrets`. Rotation is independent between the
@@ -49,6 +53,13 @@ manual GitOps gate until the four image workflows publish immutable digests,
 the `main` integration tags in that bundle are replaced by those digests, and
 the three AWS objects above exist. Do not synchronize a mutable image tag into
 production.
+
+The `k8s/admin-secrets` bundle creates only the `hhm-admin` namespace and its
+ExternalSecrets. The admin web and API repositories remain the authorities for
+their own runtime manifests. All three admin GitOps applications must stay
+manual until the isolated admin database, dedicated Shared Auth admin realm,
+Cloudflare Access policies, registry pull credential, and immutable image
+digests have each passed their independent acceptance gates.
 
 ## Cloudflare configuration after merge
 
