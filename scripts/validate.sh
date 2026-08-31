@@ -7,6 +7,7 @@ if command -v kubectl >/dev/null; then
   kubectl kustomize k8s/base >/dev/null
   kubectl kustomize k8s/overlays/dev >/dev/null
   kubectl kustomize k8s/edge >/dev/null
+  kubectl kustomize k8s/runtime >/dev/null
 fi
 if command -v terraform >/dev/null; then
   terraform -chdir=terraform fmt -check

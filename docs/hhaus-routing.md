@@ -35,14 +35,20 @@ Cloudflare DNS comments:
 | --- | --- | --- |
 | `hhm/prod/cloudflare/public-tunnel` | `token` | `hhm-public-tunnel` |
 | `hhm/prod/cloudflare/admin-tunnel` | `token` | `hhm-admin-tunnel` |
+| `hhm/prod/api-runtime` | `DATABASE_URL`, `SUPABASE_DATABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `TURNSTILE_SECRET_KEY`, `SHARED_AUTH_SERVICE_CREDENTIAL` | `hhm-api` |
+| `hhm/prod/user-web-runtime` | `READ_DATABASE_URL` | `hhm-web` |
+| `hhm/prod/ghcr-pull` | `dockerconfigjson` | public runtime image pulls |
 
 The `ExternalSecret` objects read them through the existing
 `ClusterSecretStore/dd-cluster-secrets`. Rotation is independent between the
 two planes.
 
-Runtime deployments additionally need their own secret-manager objects (for
-example `hhm/prod/api-runtime` and `hhm/prod/user-web-runtime`). They are not
-modeled here until the runtime image workflows publish immutable digests.
+The `k8s/runtime` bundle models the canonical Rust API and user-web Services,
+their ExternalSecrets, and their default-deny network boundaries. It remains a
+manual GitOps gate until the four image workflows publish immutable digests,
+the `main` integration tags in that bundle are replaced by those digests, and
+the three AWS objects above exist. Do not synchronize a mutable image tag into
+production.
 
 ## Cloudflare configuration after merge
 

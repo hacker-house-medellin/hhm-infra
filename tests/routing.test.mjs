@@ -14,6 +14,14 @@ const userWebManifest = await readFile(
   new URL("../k8s/base/hhm-mash-web.yaml", import.meta.url),
   "utf8",
 );
+const productionRuntime = await readFile(
+  new URL("../k8s/runtime/public-runtime.yaml", import.meta.url),
+  "utf8",
+);
+const productionRuntimeSecrets = await readFile(
+  new URL("../k8s/runtime/external-secrets.yaml", import.meta.url),
+  "utf8",
+);
 
 test("admin and public traffic use distinct fail-closed planes", () => {
   assert.equal(contract.origin_policy.direct_public_origin, false);
@@ -68,4 +76,15 @@ test("runtime manifests use the servers actual host and port contract", () => {
   assert.match(userWebManifest, /name: HOST, value: 0\.0\.0\.0/);
   assert.match(userWebManifest, /name: PORT, value: "8081"/);
   assert.doesNotMatch(userWebManifest, /name: BIND_ADDR/);
+});
+
+test("production runtime names the canonical Rust images and secret-manager inputs", () => {
+  assert.match(productionRuntime, /ghcr\.io\/hacker-house-medellin\/hhm-api:main/);
+  assert.match(productionRuntime, /ghcr\.io\/hacker-house-medellin\/hhm-web:main/);
+  assert.match(productionRuntime, /name: hhm-api-runtime/);
+  assert.match(productionRuntime, /name: hhm-web-runtime/);
+  assert.match(productionRuntime, /name: hhm-ghcr-pull/);
+  assert.match(productionRuntimeSecrets, /key: hhm\/prod\/api-runtime/);
+  assert.match(productionRuntimeSecrets, /key: hhm\/prod\/user-web-runtime/);
+  assert.match(productionRuntimeSecrets, /key: hhm\/prod\/ghcr-pull/);
 });
