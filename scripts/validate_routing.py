@@ -74,6 +74,21 @@ for denied in ("/auth/delegate", "/auth/introspect", "/auth/exchange", "/metrics
 if "location / { return 404; }" not in public_config:
     raise SystemExit("auth host has no fail-closed catch-all")
 
+api_manifest = (ROOT / "k8s/base/hhm-api.yaml").read_text()
+user_web_manifest = (ROOT / "k8s/base/hhm-mash-web.yaml").read_text()
+for name, manifest, port in (
+    ("api", api_manifest, "8080"),
+    ("user web", user_web_manifest, "8081"),
+):
+    if "name: HOST, value: 0.0.0.0" not in manifest:
+        raise SystemExit(f"{name} manifest does not set the server HOST contract")
+    if f'name: PORT, value: "{port}"' not in manifest:
+        raise SystemExit(f"{name} manifest does not set the server PORT contract")
+    if "name: BIND_ADDR" in manifest:
+        raise SystemExit(f"{name} manifest still uses the unsupported BIND_ADDR variable")
+if "containerPort: 8081" not in user_web_manifest:
+    raise SystemExit("user web manifest does not expose its actual 8081 listener")
+
 network_policies = (ROOT / "k8s/edge/network-policies.yaml").read_text()
 public_egress = network_policies.split(
     "name: public-tunnel-to-public-gateway-egress", 1

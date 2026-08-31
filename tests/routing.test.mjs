@@ -6,6 +6,14 @@ const contract = JSON.parse(
   await readFile(new URL("../routing/hhaus-hosts.json", import.meta.url), "utf8"),
 );
 const hosts = new Map(contract.hosts.map((entry) => [entry.hostname, entry]));
+const apiManifest = await readFile(
+  new URL("../k8s/base/hhm-api.yaml", import.meta.url),
+  "utf8",
+);
+const userWebManifest = await readFile(
+  new URL("../k8s/base/hhm-mash-web.yaml", import.meta.url),
+  "utf8",
+);
 
 test("admin and public traffic use distinct fail-closed planes", () => {
   assert.equal(contract.origin_policy.direct_public_origin, false);
@@ -41,4 +49,15 @@ test("authenticated forms and referrals stay on the user host", () => {
     new Set(hosts.get("user.hhaus.org").routes),
     new Set(["/submit-pre-interest", "/submit-application", "/submit-referral"]),
   );
+});
+
+test("runtime manifests use the servers actual host and port contract", () => {
+  assert.match(apiManifest, /name: HOST, value: 0\.0\.0\.0/);
+  assert.match(apiManifest, /name: PORT, value: "8080"/);
+  assert.doesNotMatch(apiManifest, /name: BIND_ADDR/);
+
+  assert.match(userWebManifest, /containerPort: 8081/);
+  assert.match(userWebManifest, /name: HOST, value: 0\.0\.0\.0/);
+  assert.match(userWebManifest, /name: PORT, value: "8081"/);
+  assert.doesNotMatch(userWebManifest, /name: BIND_ADDR/);
 });
