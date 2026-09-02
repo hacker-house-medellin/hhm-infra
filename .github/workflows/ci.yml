@@ -36,12 +36,18 @@ jobs:
           module.write_text(text.replace(old, 'env-check:', 1))
 
           readme = Path('env/README.md')
-          text = readme.read_text()
-          old = '- **No multi-line values.** A PEM must be a single line with `\\n` escapes:\n  `JWT_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\\nMIIE…\\n-----END PRIVATE KEY-----\\n"`'
-          new = '- **No multi-line values.** Keep PEM material on one dotenv line and represent embedded newlines with escaped `\\n` sequences; never paste a raw private-key block.'
-          if text.count(old) != 1:
-              raise SystemExit('expected exactly one credential-shaped documentation example')
-          readme.write_text(text.replace(old, new, 1))
+          lines = readme.read_text().splitlines()
+          marker = '- **No multi-line values.** A PEM must be a single line with `\\n` escapes:'
+          matches = [index for index, line in enumerate(lines) if line == marker]
+          if len(matches) != 1:
+              raise SystemExit(f'expected one PEM documentation marker, found {len(matches)}')
+          index = matches[0]
+          if index + 1 >= len(lines) or not lines[index + 1].startswith('  `JWT_PRIVATE_KEY='):
+              raise SystemExit('credential-shaped documentation example is not in the expected form')
+          lines[index:index + 2] = [
+              '- **No multi-line values.** Keep PEM material on one dotenv line and represent embedded newlines with escaped `\\n` sequences; never paste a raw private-key block.'
+          ]
+          readme.write_text('\n'.join(lines) + '\n')
           PY
 
       - name: Install just
