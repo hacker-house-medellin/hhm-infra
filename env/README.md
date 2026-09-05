@@ -92,8 +92,7 @@ encrypted, so anything explanatory belongs in this file instead.
 
 Two format limits, inherited from sops' dotenv parser:
 
-- **No multi-line values.** A PEM must be a single line with `\n` escapes;
-  represent it in documentation as `JWT_PRIVATE_KEY="<escaped PEM value>"`.
+- **No multi-line values.** Keep PEM material on one dotenv line and represent embedded newlines with escaped `\n` sequences; never paste a raw private-key block. In documentation show it only as a placeholder, e.g. `JWT_PRIVATE_KEY="<escaped PEM value>"`.
 - **Blank lines are dropped** on round-trip. Cosmetic only.
 
 ## Containers
