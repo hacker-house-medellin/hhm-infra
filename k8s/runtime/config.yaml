@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hhm-api-runtime-config
+  namespace: hhm
+data:
+  HOST: 0.0.0.0
+  PORT: "8080"
+  RUST_LOG: info,hhm_api=info
+  SUPABASE_URL: https://bihpugkzayenywfyajnr.supabase.co
+  TURNSTILE_ACTION: intake
+  SHARED_AUTH_BASE_URL: http://dd-shared-auth.shared-auth.svc.cluster.local:8120
+  SHARED_AUTH_AUDIENCE: hhm-api
+  CORS_ORIGINS: https://hhaus.org,https://www.hhaus.org,https://medellin.hhaus.org,https://user.hhaus.org
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hhm-web-runtime-config
+  namespace: hhm
+data:
+  HOST: 0.0.0.0
+  PORT: "8081"
+  RUST_LOG: info,hhm_mash_web=info
+  API_BASE_URL: http://hhm-api.hhm.svc.cluster.local:8080
+  SUPABASE_URL: https://bihpugkzayenywfyajnr.supabase.co
+  SHARED_AUTH_BASE_URL: http://dd-shared-auth.shared-auth.svc.cluster.local:8120
+  SHARED_AUTH_SESSION_COOKIE_NAME: __Host-hhaus-user
+  SHARED_AUTH_BROWSER_PREFIX: /shared-auth-ui
+  SHARED_AUTH_DELEGATION_CLIENT_ID: hhm-user-web
+  SHARED_AUTH_API_AUDIENCE: hhm-api
+  PUBLIC_ORIGIN: https://user.hhaus.org

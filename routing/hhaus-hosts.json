@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "zone": "hhaus.org",
+  "origin_policy": {
+    "cluster_public_entrypoint": "cloudflare-tunnel-only",
+    "admin_entrypoint": "separate-cloudflare-access-tunnel",
+    "direct_public_origin": false
+  },
+  "hosts": [
+    {
+      "hostname": "hhaus.org",
+      "purpose": "public-marketing-and-anonymous-intake",
+      "edge": "github-pages",
+      "state": "live",
+      "routes": [
+        "/",
+        "/submit-pre-interest",
+        "/submit-application"
+      ]
+    },
+    {
+      "hostname": "www.hhaus.org",
+      "purpose": "marketing-alias",
+      "edge": "github-pages",
+      "state": "live"
+    },
+    {
+      "hostname": "medellin.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "routes": [
+        "https://hhaus.org/locations/medellin/"
+      ]
+    },
+    {
+      "hostname": "user.hhaus.org",
+      "purpose": "authenticated-user-intake-and-referrals",
+      "edge": "hhm-public-tunnel",
+      "upstream": "http://hhm-web.hhm.svc.cluster.local:8081",
+      "state": "gated",
+      "routes": [
+        "/submit-pre-interest",
+        "/submit-application",
+        "/submit-referral"
+      ]
+    },
+    {
+      "hostname": "auth.hhaus.org",
+      "purpose": "browser-shared-auth-ceremony-only",
+      "edge": "hhm-public-tunnel",
+      "upstream": "http://dd-shared-auth.shared-auth.svc.cluster.local:8120",
+      "state": "gated",
+      "allowed_routes": [
+        "/",
+        "/ui",
+        "/auth/browser/sign-in",
+        "/auth/browser/consume",
+        "/auth/browser/otp"
+      ],
+      "denied_route_classes": [
+        "/auth/delegate",
+        "/auth/introspect",
+        "/auth/exchange",
+        "/metrics",
+        "catch-all"
+      ]
+    },
+    {
+      "hostname": "api.hhaus.org",
+      "purpose": "public-intake-api",
+      "edge": "hhm-public-tunnel",
+      "upstream": "http://hhm-api.hhm.svc.cluster.local:8080",
+      "state": "gated"
+    },
+    {
+      "hostname": "admin.hhaus.org",
+      "purpose": "operator-web",
+      "edge": "hhm-admin-tunnel",
+      "upstream": "http://admin-web.hhm-admin.svc.cluster.local:8080",
+      "cloudflare_access": "interactive-sso-mfa-default-deny",
+      "state": "gated"
+    },
+    {
+      "hostname": "admin-api.hhaus.org",
+      "purpose": "operator-api",
+      "edge": "hhm-admin-tunnel",
+      "upstream": "http://admin-api.hhm-admin.svc.cluster.local:8080",
+      "cloudflare_access": "service-token-default-deny",
+      "state": "gated"
+    }
+  ]
+}

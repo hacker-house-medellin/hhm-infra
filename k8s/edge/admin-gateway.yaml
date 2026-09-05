@@ -1,0 +1,137 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hhm-admin-gateway
+  namespace: hhm-edge
+data:
+  nginx.conf: |
+    worker_processes auto;
+    pid /tmp/nginx.pid;
+    error_log /dev/stderr notice;
+
+    events {
+      worker_connections 512;
+    }
+
+    http {
+      access_log /dev/stdout;
+      proxy_http_version 1.1;
+      proxy_set_header Host $host;
+      proxy_set_header X-Forwarded-Host $host;
+      proxy_set_header X-Forwarded-Proto https;
+      proxy_set_header X-Forwarded-For $http_cf_connecting_ip;
+      proxy_set_header X-Request-ID $http_cf_ray;
+      proxy_set_header CF-Connecting-IP $http_cf_connecting_ip;
+      proxy_set_header Cf-Access-Authenticated-User-Email $http_cf_access_authenticated_user_email;
+      proxy_set_header Cf-Access-Jwt-Assertion $http_cf_access_jwt_assertion;
+      server_tokens off;
+
+      server {
+        listen 8080;
+        server_name admin.hhaus.org;
+        location = /gateway-healthz { return 200 "ok\n"; }
+        location / { proxy_pass http://admin-web.hhm-admin.svc.cluster.local:8080; }
+      }
+
+      server {
+        listen 8080;
+        server_name admin-api.hhaus.org;
+        location = /gateway-healthz { return 200 "ok\n"; }
+        location / { proxy_pass http://admin-api.hhm-admin.svc.cluster.local:8080; }
+      }
+
+      server {
+        listen 8080 default_server;
+        server_name _;
+        return 421;
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hhm-admin-gateway
+  namespace: hhm-edge
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-admin-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhm-admin-gateway
+        hhm.edge/plane: admin
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          image: docker.io/nginxinc/nginx-unprivileged:1.29.1-alpine@sha256:27985295bdb22a1ef8f712863210bd5877c0f3006494a593e86b3fe0fa55467e
+          args: ["-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /gateway-healthz
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: admin.hhaus.org
+          livenessProbe:
+            httpGet:
+              path: /gateway-healthz
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: admin.hhaus.org
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-admin-gateway
+      volumes:
+        - name: config
+          configMap:
+            name: hhm-admin-gateway
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hhm-admin-gateway
+  namespace: hhm-edge
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: hhm-admin-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http

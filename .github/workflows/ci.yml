@@ -14,4 +14,5 @@ jobs:
         with:
           persist-credentials: false
       - run: python3 scripts/verify_repo.py
+      - run: python3 scripts/validate_routing.py
       - run: node --test
