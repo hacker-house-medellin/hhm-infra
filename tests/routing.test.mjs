@@ -40,6 +40,49 @@ test("admin traffic has no public hostname or edge entrypoint", () => {
   );
 });
 
+test("Cloudflare publishes every city alias with hardened TLS and exact redirects", () => {
+  assert.deepEqual(contract.cloudflare_edge_contract, {
+    minimum_tls_version: "1.2",
+    always_use_https: true,
+    tls_1_3: true,
+    city_redirect_status_code: 308,
+    city_redirect_preserves_query_string: true,
+    city_redirect_match: "exact-host",
+    worker_routes: false,
+  });
+
+  const cityTargets = new Map([
+    ["berlin.hhaus.org", "https://hhaus.org/locations/berlin/"],
+    ["medellin.hhaus.org", "https://hhaus.org/locations/medellin/"],
+    ["tokyo.hhaus.org", "https://hhaus.org/locations/tokyo/"],
+    ["london.hhaus.org", "https://hhaus.org/locations/london/"],
+    ["sao-paulo.hhaus.org", "https://hhaus.org/locations/sao-paulo/"],
+    ["cdmx.hhaus.org", "https://hhaus.org/locations/cdmx/"],
+    ["montreal.hhaus.org", "https://hhaus.org/locations/montreal/"],
+  ]);
+  for (const [hostname, target] of cityTargets) {
+    const entry = hosts.get(hostname);
+    assert.equal(entry.state, "live");
+    assert.equal(entry.edge, "cloudflare-city-redirect-to-apex-path");
+    assert.deepEqual(entry.routes, [target]);
+    assert.equal(entry.dns.type, "CNAME");
+    assert.equal(entry.dns.proxied, true);
+    assert.equal(
+      entry.dns.target,
+      hostname === "medellin.hhaus.org"
+        ? "hacker-house-medellin.github.io"
+        : "hhaus-org.github.io",
+    );
+  }
+  for (const hostname of ["hhaus.org", "www.hhaus.org"]) {
+    assert.deepEqual(hosts.get(hostname).dns, {
+      type: "CNAME",
+      target: "hhaus-org.github.io",
+      proxied: false,
+    });
+  }
+});
+
 test("Shared Auth exposes only the browser ceremony", () => {
   assert.deepEqual(
     new Set(hosts.get("auth.hhaus.org").allowed_routes),

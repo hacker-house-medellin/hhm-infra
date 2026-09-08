@@ -42,13 +42,55 @@ def nginx_location(text, path):
 expected_hosts = {
     "hhaus.org",
     "www.hhaus.org",
+    "berlin.hhaus.org",
     "medellin.hhaus.org",
+    "tokyo.hhaus.org",
+    "london.hhaus.org",
+    "sao-paulo.hhaus.org",
+    "cdmx.hhaus.org",
+    "montreal.hhaus.org",
     "user.hhaus.org",
     "auth.hhaus.org",
     "api.hhaus.org",
 }
 by_host = {entry["hostname"]: entry for entry in HOSTS["hosts"]}
 require(set(by_host) == expected_hosts, "public hostname contract must exclude admin hosts")
+
+edge_contract = HOSTS["cloudflare_edge_contract"]
+require(edge_contract["minimum_tls_version"] == "1.2", "Cloudflare minimum TLS must remain 1.2")
+require(edge_contract["always_use_https"] is True, "Cloudflare must redirect HTTP to HTTPS")
+require(edge_contract["tls_1_3"] is True, "Cloudflare TLS 1.3 must remain enabled")
+require(edge_contract["city_redirect_status_code"] == 308, "city redirects must remain permanent")
+require(edge_contract["city_redirect_preserves_query_string"] is True, "city redirects must preserve query strings")
+require(edge_contract["city_redirect_match"] == "exact-host", "city redirects must use exact host matching")
+require(edge_contract["worker_routes"] is False, "marketing routing must not be shadowed by a Worker route")
+
+city_routes = {
+    "berlin.hhaus.org": "https://hhaus.org/locations/berlin/",
+    "medellin.hhaus.org": "https://hhaus.org/locations/medellin/",
+    "tokyo.hhaus.org": "https://hhaus.org/locations/tokyo/",
+    "london.hhaus.org": "https://hhaus.org/locations/london/",
+    "sao-paulo.hhaus.org": "https://hhaus.org/locations/sao-paulo/",
+    "cdmx.hhaus.org": "https://hhaus.org/locations/cdmx/",
+    "montreal.hhaus.org": "https://hhaus.org/locations/montreal/",
+}
+for hostname, target in city_routes.items():
+    entry = by_host[hostname]
+    require(entry["purpose"] == "location-marketing-alias", f"{hostname} purpose changed")
+    require(entry["edge"] == "cloudflare-city-redirect-to-apex-path", f"{hostname} edge changed")
+    require(entry["state"] == "live", f"{hostname} must remain live")
+    require(entry["routes"] == [target], f"{hostname} canonical target changed")
+    require(entry["dns"]["type"] == "CNAME", f"{hostname} DNS record must remain CNAME")
+    require(entry["dns"]["proxied"] is True, f"{hostname} must remain proxied")
+    expected_origin = "hacker-house-medellin.github.io" if hostname == "medellin.hhaus.org" else "hhaus-org.github.io"
+    require(entry["dns"]["target"] == expected_origin, f"{hostname} DNS origin changed")
+
+for hostname in ("hhaus.org", "www.hhaus.org"):
+    require(by_host[hostname]["dns"] == {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": False,
+    }, f"{hostname} GitHub Pages DNS contract changed")
 
 interface_contract = TRANSPORTS["interface_contract"]
 require(interface_contract["repository"] == "hacker-house-medellin/hhm-interfaces", "interface authority changed")

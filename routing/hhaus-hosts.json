@@ -8,12 +8,26 @@
     "public_raw_tcp_allowed": false,
     "direct_public_origin": false
   },
+  "cloudflare_edge_contract": {
+    "minimum_tls_version": "1.2",
+    "always_use_https": true,
+    "tls_1_3": true,
+    "city_redirect_status_code": 308,
+    "city_redirect_preserves_query_string": true,
+    "city_redirect_match": "exact-host",
+    "worker_routes": false
+  },
   "hosts": [
     {
       "hostname": "hhaus.org",
       "purpose": "public-marketing-and-anonymous-intake",
       "edge": "github-pages",
       "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": false
+      },
       "routes": [
         "/",
         "/submit-pre-interest",
@@ -24,15 +38,109 @@
       "hostname": "www.hhaus.org",
       "purpose": "marketing-alias",
       "edge": "github-pages",
-      "state": "live"
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": false
+      }
+    },
+    {
+      "hostname": "berlin.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/berlin/"
+      ]
     },
     {
       "hostname": "medellin.hhaus.org",
       "purpose": "location-marketing-alias",
       "edge": "cloudflare-city-redirect-to-apex-path",
       "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hacker-house-medellin.github.io",
+        "proxied": true
+      },
       "routes": [
         "https://hhaus.org/locations/medellin/"
+      ]
+    },
+    {
+      "hostname": "tokyo.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/tokyo/"
+      ]
+    },
+    {
+      "hostname": "london.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/london/"
+      ]
+    },
+    {
+      "hostname": "sao-paulo.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/sao-paulo/"
+      ]
+    },
+    {
+      "hostname": "cdmx.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/cdmx/"
+      ]
+    },
+    {
+      "hostname": "montreal.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/montreal/"
       ]
     },
     {
