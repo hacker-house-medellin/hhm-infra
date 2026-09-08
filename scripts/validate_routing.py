@@ -50,6 +50,12 @@ expected_hosts = {
 by_host = {entry["hostname"]: entry for entry in HOSTS["hosts"]}
 require(set(by_host) == expected_hosts, "public hostname contract must exclude admin hosts")
 
+interface_contract = TRANSPORTS["interface_contract"]
+require(interface_contract["repository"] == "hacker-house-medellin/hhm-interfaces", "interface authority changed")
+require(re.fullmatch(r"[0-9a-f]{40}", interface_contract["revision"]) is not None, "interface revision must be a full commit SHA")
+require(interface_contract["revision"] == "b66988b856946ff028085323ff502796b97e0012", "transport envelope revision changed")
+require(interface_contract["release_state"] == "production", "transport envelope is not production")
+
 origin_policy = HOSTS["origin_policy"]
 require(origin_policy["direct_public_origin"] is False, "direct public origin must remain disabled")
 require(origin_policy["admin_entrypoint"] == "private-network-only", "admin entrypoint must stay private")

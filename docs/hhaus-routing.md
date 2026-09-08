@@ -5,6 +5,9 @@
 WebSocket, raw TCP, and admin-to-MCP communication. The manifests in `k8s/edge`
 deliberately contain no public `LoadBalancer`, `NodePort`, or `Ingress`; the
 single public plane establishes an outbound Cloudflare Tunnel connection.
+Wire envelopes are pinned to production `hacker-house-medellin/hhm-interfaces`
+revision `b66988b856946ff028085323ff502796b97e0012`; application releases must
+advance that full revision deliberately rather than following a branch name.
 
 ## Public HTTP and WebSocket plane
 
@@ -137,7 +140,7 @@ the existing cluster edge gateway.
 
 1. Merge the application protocol contracts. Verify the HTTP/WebSocket routes,
    heartbeat, frame, timeout, first-frame authorization, and stdio rules match
-   this repository's contract.
+   this repository's contract and its pinned `hhm-interfaces` revision.
 2. Publish API, web, admin, and MCP artifacts. Record their source commits and
    pin multi-architecture image digests; mutable integration tags remain a
    deployment blocker.

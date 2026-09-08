@@ -1,6 +1,11 @@
 {
   "schema_version": 1,
   "contract_revision": "2026-09-07",
+  "interface_contract": {
+    "repository": "hacker-house-medellin/hhm-interfaces",
+    "revision": "b66988b856946ff028085323ff502796b97e0012",
+    "release_state": "production"
+  },
   "ownership": {
     "api_listener_repository": "hacker-house-medellin/hhm-api-server.rs",
     "web_client_repository": "hacker-house-medellin/hhm-web-server.rs",

@@ -99,6 +99,11 @@ test("GKE raw TCP is ClusterIP-only and unreachable from public ingress", () => 
 });
 
 test("application ownership is distinct from Kubernetes workload identity", () => {
+  assert.deepEqual(transports.interface_contract, {
+    repository: "hacker-house-medellin/hhm-interfaces",
+    revision: "b66988b856946ff028085323ff502796b97e0012",
+    release_state: "production",
+  });
   assert.equal(transports.ownership.api_listener_repository, "hacker-house-medellin/hhm-api-server.rs");
   assert.equal(transports.ownership.web_client_repository, "hacker-house-medellin/hhm-web-server.rs");
   assert.equal(transports.ownership.kubernetes_api_workload, "hhm-api");
