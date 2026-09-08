@@ -2,6 +2,7 @@
 set -euo pipefail
 python3 -m json.tool catalog/services.json >/dev/null
 python3 -m json.tool routing/hhaus-hosts.json >/dev/null
+python3 -m json.tool routing/realtime-transports.json >/dev/null
 python3 scripts/validate_routing.py
 if command -v kubectl >/dev/null; then
   kubectl kustomize k8s/base >/dev/null

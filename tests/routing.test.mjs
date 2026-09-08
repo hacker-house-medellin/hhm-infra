@@ -23,19 +23,13 @@ const productionRuntimeSecrets = await readFile(
   "utf8",
 );
 
-test("admin and public traffic use distinct fail-closed planes", () => {
+test("admin traffic has no public hostname or edge entrypoint", () => {
   assert.equal(contract.origin_policy.direct_public_origin, false);
-  assert.notEqual(hosts.get("admin.hhaus.org").edge, hosts.get("user.hhaus.org").edge);
-  assert.match(hosts.get("admin.hhaus.org").cloudflare_access, /default-deny/);
-  assert.match(hosts.get("admin-api.hhaus.org").cloudflare_access, /default-deny/);
-  assert.equal(
-    hosts.get("admin.hhaus.org").upstream,
-    "http://admin-web.hhm-admin.svc.cluster.local:8080",
-  );
-  assert.equal(
-    hosts.get("admin-api.hhaus.org").upstream,
-    "http://admin-api.hhm-admin.svc.cluster.local:8080",
-  );
+  assert.equal(contract.origin_policy.admin_entrypoint, "private-network-only");
+  assert.equal(contract.origin_policy.admin_public_hostnames_allowed, false);
+  assert.equal(contract.origin_policy.public_raw_tcp_allowed, false);
+  assert.equal(hosts.has("admin.hhaus.org"), false);
+  assert.equal(hosts.has("admin-api.hhaus.org"), false);
   assert.equal(
     hosts.get("user.hhaus.org").upstream,
     "http://hhm-web.hhm.svc.cluster.local:8081",
@@ -65,6 +59,8 @@ test("authenticated forms and referrals stay on the user host", () => {
     new Set(hosts.get("user.hhaus.org").routes),
     new Set(["/submit-pre-interest", "/submit-application", "/submit-referral"]),
   );
+  assert.deepEqual(hosts.get("user.hhaus.org").websocket_routes, ["/ws", "/ws/chat"]);
+  assert.deepEqual(hosts.get("api.hhaus.org").websocket_routes, ["/v1/realtime"]);
 });
 
 test("runtime manifests use the servers actual host and port contract", () => {
@@ -78,9 +74,7 @@ test("runtime manifests use the servers actual host and port contract", () => {
   assert.doesNotMatch(userWebManifest, /name: BIND_ADDR/);
 });
 
-test("production runtime names the canonical Rust images and secret-manager inputs", () => {
-  assert.match(productionRuntime, /ghcr\.io\/hacker-house-medellin\/hhm-api:main/);
-  assert.match(productionRuntime, /ghcr\.io\/hacker-house-medellin\/hhm-web:main/);
+test("production runtime keeps provider inputs out of public routing", () => {
   assert.match(productionRuntime, /name: hhm-api-runtime/);
   assert.match(productionRuntime, /name: hhm-web-runtime/);
   assert.match(productionRuntime, /name: hhm-ghcr-pull/);

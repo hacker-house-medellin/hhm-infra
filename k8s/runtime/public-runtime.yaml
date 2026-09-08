@@ -46,6 +46,8 @@ spec:
           ports:
             - name: http
               containerPort: 8080
+            - name: tcp-realtime
+              containerPort: 8090
           envFrom:
             - configMapRef:
                 name: hhm-api-runtime-config
@@ -92,6 +94,26 @@ spec:
     - name: http
       port: 8080
       targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hhm-api-internal
+  namespace: hhm
+  labels:
+    hhm.network/exposure: cluster-internal-only
+spec:
+  type: ClusterIP
+  internalTrafficPolicy: Cluster
+  sessionAffinity: None
+  selector:
+    app.kubernetes.io/name: hhm-api
+  ports:
+    - name: tcp-realtime
+      protocol: TCP
+      appProtocol: hhm.oresoftware.com/realtime-v1
+      port: 8090
+      targetPort: tcp-realtime
 ---
 apiVersion: apps/v1
 kind: Deployment

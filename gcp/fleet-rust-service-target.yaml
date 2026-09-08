@@ -7,6 +7,9 @@ metadata:
   name: hacker-house-medellin
   githubOwner: hacker-house-medellin
   linearIssue: DEN-3443
+  annotations:
+    hhm.oresoftware.com/realtime-contract: routing/realtime-transports.json
+    hhm.oresoftware.com/raw-tcp-exposure: gke-clusterip-only
 spec:
   controlPlane:
     repository: ORESoftware/k8s-cluster
