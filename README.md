@@ -11,8 +11,11 @@ python3 scripts/validate_routing.py
 ```
 
 The production hostname and trust-plane contract lives in
-[`routing/hhaus-hosts.json`](routing/hhaus-hosts.json). The separately isolated
-public and admin Cloudflare Tunnel gateways live in [`k8s/edge`](k8s/edge) and
+[`routing/hhaus-hosts.json`](routing/hhaus-hosts.json), while WebSocket, internal
+TCP, and private admin MCP ownership lives in
+[`routing/realtime-transports.json`](routing/realtime-transports.json). The sole
+Cloudflare Tunnel gateway in [`k8s/edge`](k8s/edge) serves only public HTTP/WSS.
+Admin web, admin API, MCP, and raw TCP have no public hostname or edge route and
 remain fail-closed until the release gates in
 [`docs/hhaus-routing.md`](docs/hhaus-routing.md) are satisfied.
 

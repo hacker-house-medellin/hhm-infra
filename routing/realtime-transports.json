@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "contract_revision": "2026-09-07",
+  "ownership": {
+    "api_listener_repository": "hacker-house-medellin/hhm-api-server.rs",
+    "web_client_repository": "hacker-house-medellin/hhm-web-server.rs",
+    "admin_api_repository": "hacker-house-medellin/hhm-admin-api-server.rs",
+    "mcp_server_repository": "hacker-house-medellin/hhm-mcp-server.rs",
+    "kubernetes_api_workload": "hhm-api",
+    "kubernetes_web_workload": "hhm-web"
+  },
+  "public_websocket": {
+    "scheme": "wss",
+    "route_match": "exact",
+    "allow_catch_all_upgrade": false,
+    "heartbeat_max_interval_seconds": 30,
+    "proxy_read_timeout_seconds": 75,
+    "proxy_send_timeout_seconds": 75,
+    "routes": [
+      {
+        "host": "user.hhaus.org",
+        "path": "/ws",
+        "upstream": "http://hhm-web.hhm.svc.cluster.local:8081"
+      },
+      {
+        "host": "user.hhaus.org",
+        "path": "/ws/chat",
+        "upstream": "http://hhm-web.hhm.svc.cluster.local:8081"
+      },
+      {
+        "host": "api.hhaus.org",
+        "path": "/v1/realtime",
+        "upstream": "http://hhm-api.hhm.svc.cluster.local:8080"
+      }
+    ]
+  },
+  "internal_raw_tcp": {
+    "deployment_target": "gke",
+    "cloud_run_supported": false,
+    "service_name": "hhm-api-internal",
+    "namespace": "hhm",
+    "fqdn": "hhm-api-internal.hhm.svc.cluster.local",
+    "service_type": "ClusterIP",
+    "port": 8090,
+    "application_protocol": "hhm.oresoftware.com/realtime-v1",
+    "listener_owner_repository": "hacker-house-medellin/hhm-api-server.rs",
+    "client_owner_repository": "hacker-house-medellin/hhm-web-server.rs",
+    "allowed_kubernetes_callers": [
+      "hhm-web"
+    ],
+    "public_route": false,
+    "first_frame_requires_authorization": true,
+    "maximum_frame_bytes": 65536,
+    "heartbeat_max_interval_seconds": 30,
+    "idle_timeout_seconds": 75
+  },
+  "private_admin_mcp": {
+    "namespace": "hhm-admin",
+    "transport": "stdio",
+    "process_owner_repository": "hacker-house-medellin/hhm-admin-api-server.rs",
+    "server_repository": "hacker-house-medellin/hhm-mcp-server.rs",
+    "admin_web_access": "through-private-admin-api-only",
+    "stdout_contract": "json-rpc-only",
+    "diagnostics_contract": "stderr-only",
+    "network_listener": false,
+    "kubernetes_service": false,
+    "public_route": false,
+    "network_policy": "namespace-default-deny"
+  },
+  "desired_state_inputs": {
+    "gateway_config": "content-hashed-immutable-configmap",
+    "edge_images": "sha256-digest-only",
+    "application_images": "blocked-until-sha256-digests-are-published"
+  }
+}

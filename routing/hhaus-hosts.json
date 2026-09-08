@@ -3,7 +3,9 @@
   "zone": "hhaus.org",
   "origin_policy": {
     "cluster_public_entrypoint": "cloudflare-tunnel-only",
-    "admin_entrypoint": "separate-cloudflare-access-tunnel",
+    "admin_entrypoint": "private-network-only",
+    "admin_public_hostnames_allowed": false,
+    "public_raw_tcp_allowed": false,
     "direct_public_origin": false
   },
   "hosts": [
@@ -43,6 +45,10 @@
         "/submit-pre-interest",
         "/submit-application",
         "/submit-referral"
+      ],
+      "websocket_routes": [
+        "/ws",
+        "/ws/chat"
       ]
     },
     {
@@ -71,23 +77,10 @@
       "purpose": "public-intake-api",
       "edge": "hhm-public-tunnel",
       "upstream": "http://hhm-api.hhm.svc.cluster.local:8080",
-      "state": "gated"
-    },
-    {
-      "hostname": "admin.hhaus.org",
-      "purpose": "operator-web",
-      "edge": "hhm-admin-tunnel",
-      "upstream": "http://admin-web.hhm-admin.svc.cluster.local:8080",
-      "cloudflare_access": "interactive-sso-mfa-default-deny",
-      "state": "gated"
-    },
-    {
-      "hostname": "admin-api.hhaus.org",
-      "purpose": "operator-api",
-      "edge": "hhm-admin-tunnel",
-      "upstream": "http://admin-api.hhm-admin.svc.cluster.local:8080",
-      "cloudflare_access": "service-token-default-deny",
-      "state": "gated"
+      "state": "gated",
+      "websocket_routes": [
+        "/v1/realtime"
+      ]
     }
   ]
 }
