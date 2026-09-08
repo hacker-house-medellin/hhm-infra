@@ -124,6 +124,21 @@ passed independent acceptance.
 
 ## Cloudflare configuration after merge
 
+The marketing edge is an explicit provider contract, not an implicit console
+default. The Cloudflare zone must require TLS 1.2 or newer, keep TLS 1.3 on,
+redirect HTTP to HTTPS, preserve query strings on every permanent city redirect,
+and have no Worker route shadowing the marketing hostnames. The apex and `www`
+remain DNS-only GitHub Pages records. The seven city aliases are proxied CNAMEs
+with exact-host 308 redirects to their matching `/locations/<city>/` paths;
+`medellin` uses `hacker-house-medellin.github.io` as its CNAME target and the
+other six use `hhaus-org.github.io`. `routing/hhaus-hosts.json` is the complete
+machine-readable record and edge-settings contract.
+
+Do not switch the Cloudflare origin mode from `Full` to `Full (strict)` until
+the proxied GitHub Pages origins present certificates whose hostnames cover the
+city aliases. That origin-certificate acceptance is independent from the active
+Cloudflare Universal SSL certificate served to visitors.
+
 Create one remotely managed tunnel and only these public hostnames:
 
 | Tunnel | Public hostname | Tunnel service |
