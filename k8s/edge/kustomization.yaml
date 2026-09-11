@@ -1,0 +1,19 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: hhm-edge
+resources:
+  - namespace.yaml
+  - external-secrets.yaml
+  - public-gateway.yaml
+  - tunnels.yaml
+  - network-policies.yaml
+configMapGenerator:
+  - name: hhm-public-gateway
+    files:
+      - nginx.conf=config/public-nginx.conf
+generatorOptions:
+  immutable: true
+labels:
+  - pairs:
+      app.kubernetes.io/part-of: hhm
+      app.kubernetes.io/managed-by: argocd

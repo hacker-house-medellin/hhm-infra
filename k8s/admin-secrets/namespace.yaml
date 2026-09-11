@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: hhm-admin
+  labels:
+    kubernetes.io/metadata.name: hhm-admin
+    app.kubernetes.io/part-of: hhm-admin

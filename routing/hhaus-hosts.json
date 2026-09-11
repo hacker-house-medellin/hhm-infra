@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "zone": "hhaus.org",
+  "origin_policy": {
+    "cluster_public_entrypoint": "cloudflare-tunnel-only",
+    "admin_entrypoint": "private-network-only",
+    "admin_public_hostnames_allowed": false,
+    "public_raw_tcp_allowed": false,
+    "direct_public_origin": false
+  },
+  "cloudflare_edge_contract": {
+    "minimum_tls_version": "1.2",
+    "always_use_https": true,
+    "tls_1_3": true,
+    "city_redirect_status_code": 308,
+    "city_redirect_preserves_query_string": true,
+    "city_redirect_match": "exact-host",
+    "worker_routes": false
+  },
+  "hosts": [
+    {
+      "hostname": "hhaus.org",
+      "purpose": "public-marketing-and-anonymous-intake",
+      "edge": "github-pages",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": false
+      },
+      "routes": [
+        "/",
+        "/submit-pre-interest",
+        "/submit-application"
+      ]
+    },
+    {
+      "hostname": "www.hhaus.org",
+      "purpose": "marketing-alias",
+      "edge": "github-pages",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": false
+      }
+    },
+    {
+      "hostname": "berlin.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/berlin/"
+      ]
+    },
+    {
+      "hostname": "medellin.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hacker-house-medellin.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/medellin/"
+      ]
+    },
+    {
+      "hostname": "tokyo.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/tokyo/"
+      ]
+    },
+    {
+      "hostname": "london.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/london/"
+      ]
+    },
+    {
+      "hostname": "sao-paulo.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/sao-paulo/"
+      ]
+    },
+    {
+      "hostname": "cdmx.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/cdmx/"
+      ]
+    },
+    {
+      "hostname": "montreal.hhaus.org",
+      "purpose": "location-marketing-alias",
+      "edge": "cloudflare-city-redirect-to-apex-path",
+      "state": "live",
+      "dns": {
+        "type": "CNAME",
+        "target": "hhaus-org.github.io",
+        "proxied": true
+      },
+      "routes": [
+        "https://hhaus.org/locations/montreal/"
+      ]
+    },
+    {
+      "hostname": "user.hhaus.org",
+      "purpose": "authenticated-user-intake-and-referrals",
+      "edge": "hhm-public-tunnel",
+      "upstream": "http://hhm-web.hhm.svc.cluster.local:8081",
+      "state": "gated",
+      "routes": [
+        "/submit-pre-interest",
+        "/submit-application",
+        "/submit-referral"
+      ],
+      "websocket_routes": [
+        "/ws",
+        "/ws/chat"
+      ]
+    },
+    {
+      "hostname": "auth.hhaus.org",
+      "purpose": "browser-shared-auth-ceremony-only",
+      "edge": "hhm-public-tunnel",
+      "upstream": "http://dd-shared-auth.shared-auth.svc.cluster.local:8120",
+      "state": "gated",
+      "allowed_routes": [
+        "/",
+        "/ui",
+        "/auth/browser/sign-in",
+        "/auth/browser/consume",
+        "/auth/browser/otp"
+      ],
+      "denied_route_classes": [
+        "/auth/delegate",
+        "/auth/introspect",
+        "/auth/exchange",
+        "/metrics",
+        "catch-all"
+      ]
+    },
+    {
+      "hostname": "api.hhaus.org",
+      "purpose": "public-intake-api",
+      "edge": "hhm-public-tunnel",
+      "upstream": "http://hhm-api.hhm.svc.cluster.local:8080",
+      "state": "gated",
+      "websocket_routes": [
+        "/v1/realtime"
+      ]
+    }
+  ]
+}

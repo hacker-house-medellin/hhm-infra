@@ -19,7 +19,8 @@ spec:
           image: ghcr.io/hacker-house-medellin/hhm-api:0.1.0
           ports: [{ name: http, containerPort: 8080 }]
           env:
-            - { name: BIND_ADDR, value: 0.0.0.0:8080 }
+            - { name: HOST, value: 0.0.0.0 }
+            - { name: PORT, value: "8080" }
           readinessProbe: { httpGet: { path: /readyz, port: http } }
           livenessProbe: { httpGet: { path: /healthz, port: http } }
           securityContext:

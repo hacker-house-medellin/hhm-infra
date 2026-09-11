@@ -17,9 +17,10 @@ spec:
       containers:
         - name: app
           image: ghcr.io/hacker-house-medellin/hhm-mash-web:0.1.0
-          ports: [{ name: http, containerPort: 8080 }]
+          ports: [{ name: http, containerPort: 8081 }]
           env:
-            - { name: BIND_ADDR, value: 0.0.0.0:8080 }
+            - { name: HOST, value: 0.0.0.0 }
+            - { name: PORT, value: "8081" }
           readinessProbe: { httpGet: { path: /readyz, port: http } }
           livenessProbe: { httpGet: { path: /healthz, port: http } }
           securityContext:

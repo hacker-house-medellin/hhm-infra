@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hhm-public-gateway
+  namespace: hhm-edge
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hhm-public-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hhm-public-gateway
+        hhm.edge/plane: public
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: nginx
+          image: docker.io/nginxinc/nginx-unprivileged:1.29.1-alpine@sha256:27985295bdb22a1ef8f712863210bd5877c0f3006494a593e86b3fe0fa55467e
+          args: ["-c", "/etc/nginx/nginx.conf", "-g", "daemon off;"]
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /gateway-healthz
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: user.hhaus.org
+          livenessProbe:
+            httpGet:
+              path: /gateway-healthz
+              port: http
+              httpHeaders:
+                - name: Host
+                  value: user.hhaus.org
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+              readOnly: true
+            - name: cache
+              mountPath: /var/cache/nginx
+            - name: run
+              mountPath: /var/run
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            readOnlyRootFilesystem: true
+          resources:
+            requests: { cpu: 25m, memory: 32Mi }
+            limits: { cpu: 250m, memory: 128Mi }
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: hhm-public-gateway
+      volumes:
+        - name: config
+          configMap:
+            name: hhm-public-gateway
+        - name: cache
+          emptyDir: {}
+        - name: run
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hhm-public-gateway
+  namespace: hhm-edge
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: hhm-public-gateway
+  ports:
+    - name: http
+      port: 8080
+      targetPort: http
