@@ -1,0 +1,47 @@
+name: neon-preview
+# Branch-per-PR for Neon. Safe no-op until NEON_API_KEY (secret) and NEON_PROJECT_ID (variable) both exist.
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+    paths:
+      - "neon/**"
+      - ".db-providers.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: neon-preview-${{ github.event.number }}
+  cancel-in-progress: false
+
+jobs:
+  branch:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check Neon activation
+        id: gate
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ vars.NEON_PROJECT_ID }}
+        run: |
+          if [ -n "$NEON_API_KEY" ] && [ -n "$NEON_PROJECT_ID" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Neon is not activated for this repository (state: planned); skipping preview branch."
+          fi
+      - name: Create preview branch
+        if: steps.gate.outputs.enabled == 'true' && github.event.action != 'closed'
+        uses: neondatabase/create-branch-action@72ed4f69a12b6be9c16aebfad893f6a21e9aba8b # v6.4.0
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch_name: preview/pr-${{ github.event.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
+      - name: Delete preview branch
+        if: steps.gate.outputs.enabled == 'true' && github.event.action == 'closed'
+        uses: neondatabase/delete-branch-action@4468d825d5a88ef4012f1705a82f02ec3072f776 # v3.2.1
+        with:
+          project_id: ${{ vars.NEON_PROJECT_ID }}
+          branch: preview/pr-${{ github.event.number }}
+          api_key: ${{ secrets.NEON_API_KEY }}
