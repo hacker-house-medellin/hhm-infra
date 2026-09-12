@@ -1,0 +1,65 @@
+{
+  "$schema": "./config/db-providers.schema.json",
+  "schemaVersion": "1.0.0",
+  "githubOrg": "hacker-house-medellin",
+  "productionBranch": "main",
+  "contractSource": {
+    "repository": "hacker-house-medellin/hhm-lib-core",
+    "path": "migrations",
+    "zedPackage": "hacker-house-medellin/hhm-lib-core"
+  },
+  "supabase": {
+    "orgRef": "zmkmcdyrryxxhleytdho",
+    "orgDisplayName": "oresoftware",
+    "githubApp": {
+      "supabaseChangesOnly": true,
+      "deployToProduction": false,
+      "automaticBranching": true
+    },
+    "projects": [
+      {
+        "ref": "pendingcanonicalproj",
+        "slug": "canonical",
+        "role": "canonical",
+        "workingDirectory": "supabase/pendingcanonicalproj",
+        "state": "planned"
+      },
+      {
+        "ref": "szzbuljocwprjhaqnbvb",
+        "slug": "auth",
+        "role": "auth",
+        "authParent": "child",
+        "workingDirectory": "supabase/szzbuljocwprjhaqnbvb",
+        "state": "planned",
+        "region": "us-east-1"
+      }
+    ]
+  },
+  "neon": {
+    "orgId": "org-pending-provider-readback",
+    "projects": [
+      {
+        "id": "hacker-house-medellin-prod",
+        "slug": "prod",
+        "directory": "neon/hacker-house-medellin-prod",
+        "region": "aws-us-east-2",
+        "productionBranch": "main",
+        "databases": [
+          {
+            "name": "canonical",
+            "role": "canonical",
+            "owner": "hacker_house_medellin_app"
+          },
+          {
+            "name": "auth",
+            "role": "auth",
+            "authParent": "child",
+            "owner": "hacker_house_medellin_auth"
+          }
+        ],
+        "previewBranches": true,
+        "state": "planned"
+      }
+    ]
+  }
+}

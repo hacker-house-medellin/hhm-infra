@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/ORESoftware/k8s-libs-and-shared-defs/supabase-defs/schemas/db-providers.schema.json",
+  "title": "DbProviders",
+  "description": "Repo-root .db-providers.json for an org's *-infra repository: the org's Supabase and Neon provider map, one entry per hosted project, plus the portable contract source. Validated by supabase-defs; read by the *-infra orchestration CLI. Never contains credentials.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "githubOrg", "contractSource"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "1.0.0" },
+    "githubOrg": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9-]*$" },
+    "linearProject": { "type": "string", "format": "uri" },
+    "cloudflareDomain": { "type": "string", "pattern": "^[a-z0-9-]+(\\.[a-z0-9-]+)+$" },
+    "gcpProject": { "type": "string" },
+    "productionBranch": { "type": "string", "default": "main" },
+    "contractSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repository"],
+      "properties": {
+        "repository": { "type": "string", "pattern": "^[A-Za-z0-9-]+/[A-Za-z0-9._-]+$", "description": "*-orm-core (preferred) or *-lib-core that owns portable SQL + migrations." },
+        "path": { "type": "string", "default": "migrations" },
+        "zedPackage": { "type": "string", "description": "org/name coordinate in .zpkg.toml; the pinned version is the accepted revision." }
+      }
+    },
+    "supabase": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["orgRef", "projects"],
+      "properties": {
+        "orgRef": { "type": "string", "pattern": "^[a-z]{20}$", "description": "Supabase organization ref (public routing id, not a credential)." },
+        "orgDisplayName": { "type": "string" },
+        "githubApp": {
+          "type": "object", "additionalProperties": false,
+          "properties": {
+            "supabaseChangesOnly": { "type": "boolean", "default": true },
+            "deployToProduction": { "type": "boolean", "default": false },
+            "automaticBranching": { "type": "boolean", "default": true }
+          }
+        },
+        "projects": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["ref", "role", "workingDirectory"],
+            "properties": {
+              "ref": { "type": "string", "pattern": "^[a-z]{20}$" },
+              "slug": { "type": "string" },
+              "role": { "type": "string", "enum": ["canonical", "auth", "other"], "description": "canonical = app data DB; auth = shared-auth DB (root or child)." },
+              "authParent": { "type": "string", "enum": ["root", "child"], "description": "For role=auth: root (ores-shared-auth.com) or a per-app child federated to root." },
+              "workingDirectory": { "type": "string", "pattern": "^supabase/[a-z]{20}$" },
+              "state": { "type": "string", "enum": ["planned", "connected", "paused"], "default": "planned" },
+              "region": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "neon": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["orgId", "projects"],
+      "properties": {
+        "orgId": { "type": "string", "pattern": "^org-[a-z0-9-]+$" },
+        "projects": {
+          "type": "array", "minItems": 1,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["id", "directory", "databases"],
+            "properties": {
+              "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+              "slug": { "type": "string" },
+              "directory": { "type": "string", "pattern": "^neon/[a-z0-9-]+$" },
+              "region": { "type": "string" },
+              "productionBranch": { "type": "string", "default": "main" },
+              "databases": {
+                "type": "array", "minItems": 1,
+                "items": { "type": "object", "additionalProperties": false, "required": ["name", "role"],
+                  "properties": {
+                    "name": { "type": "string", "enum": ["canonical", "auth"] },
+                    "role": { "type": "string", "enum": ["canonical", "auth"] },
+                    "authParent": { "type": "string", "enum": ["root", "child"] },
+                    "owner": { "type": "string", "description": "Neon role name (not a password)." }
+                  } }
+              },
+              "previewBranches": { "type": "boolean", "default": true },
+              "state": { "type": "string", "enum": ["planned", "connected", "paused"], "default": "planned" }
+            }
+          }
+        }
+      }
+    }
+  }
+}
