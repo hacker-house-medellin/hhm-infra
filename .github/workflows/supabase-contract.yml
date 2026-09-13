@@ -1,0 +1,36 @@
+name: supabase-contract
+on:
+  pull_request:
+    paths:
+      - "supabase/**"
+      - ".db-providers.json"
+      - "config/db-providers.schema.json"
+      - "scripts/check-db-providers.py"
+      - ".github/workflows/supabase-contract.yml"
+  push:
+    branches: [main]
+    paths:
+      - "supabase/**"
+      - ".db-providers.json"
+      - "config/db-providers.schema.json"
+      - "scripts/check-db-providers.py"
+      - ".github/workflows/supabase-contract.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: supabase-contract-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - run: python3 -m pip install --user "jsonschema==4.25.1"
+      - run: python3 scripts/check-db-providers.py
+      - run: git diff --exit-code
