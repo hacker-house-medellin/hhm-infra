@@ -1,0 +1,38 @@
+name: Supabase provider consolidation
+
+on:
+  pull_request:
+    paths:
+      - 'supabase/bihpugkzayenywfyajnr/**'
+      - '.github/workflows/supabase-provider-consolidation.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/bihpugkzayenywfyajnr/**'
+      - '.github/workflows/supabase-provider-consolidation.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate consolidated provider root
+        shell: bash
+        run: |
+          set -euo pipefail
+          root='supabase/bihpugkzayenywfyajnr'
+          test -f "$root/target.json"
+          test -f "$root/supabase/config.toml"
+          test -f "$root/supabase/migrations/20260830000100_hhm_intake.sql"
+          test -f "$root/supabase/migrations/20260831000100_hhm_application_placement.sql"
+          test -f "$root/supabase/migrations/20260831000200_harden_rls_auto_enable_acl.sql"
+          grep -Fq 'project_id = "bihpugkzayenywfyajnr"' "$root/supabase/config.toml"
+          grep -Fq 'CREATE TABLE IF NOT EXISTS "public"."hhm_applications"' "$root/supabase/migrations/20260830000100_hhm_intake.sql"
+          grep -Fq 'hhm-intake-private' "$root/supabase/migrations/20260830000100_hhm_intake.sql"
+          grep -Fq 'accommodation_data_consent' "$root/supabase/migrations/20260831000100_hhm_application_placement.sql"
+          grep -Fq "to_regprocedure('public.rls_auto_enable()')" "$root/supabase/migrations/20260831000200_harden_rls_auto_enable_acl.sql"
+          python -m json.tool "$root/target.json" >/dev/null
+          python -m json.tool "$root/CONSOLIDATION.json" >/dev/null
