@@ -1,0 +1,30 @@
+project_id = "bihpugkzayenywfyajnr"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+auto_expose_new_tables = false
+
+[db]
+major_version = 17
+
+[db.migrations]
+enabled = true
+schema_paths = []
+
+[db.seed]
+enabled = false
+sql_paths = []
+
+[auth]
+enabled = true
+enable_signup = false
+enable_anonymous_sign_ins = false
+enable_manual_linking = false
+
+[edge_runtime]
+enabled = true
+policy = "per_worker"
+deno_version = 2
