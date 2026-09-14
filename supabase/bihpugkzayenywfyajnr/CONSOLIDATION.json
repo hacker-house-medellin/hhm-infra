@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "consolidatedAt": "2026-09-14",
+  "sourceRepository": "hacker-house-medellin/hhm-supabase",
+  "destinationRepository": "hacker-house-medellin/hhm-infra",
+  "projectRef": "bihpugkzayenywfyajnr",
+  "sourceMigrationBlobs": {
+    "20260830000100_hhm_intake.sql": "3df0fdce31e90213b290bbcef4e21227a425756b",
+    "20260831000100_hhm_application_placement.sql": "2d554c8913979dd4d82f09715e82fc501d192765",
+    "20260831000200_harden_rls_auto_enable_acl.sql": "324a4dd3c260b52ea9680222a4e9ffd4b306ebf8"
+  },
+  "normalizations": [
+    "20260830000100_hhm_intake.sql omits three trailing newline bytes; SQL statements are unchanged"
+  ],
+  "deploymentEnabledByMigration": false,
+  "desiredTopologyAuthority": ".db-providers.json"
+}
