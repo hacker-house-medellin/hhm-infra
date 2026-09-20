@@ -1,6 +1,11 @@
 schema_version: ores.compose.v1
+# ores-compose-nano-id: ADkVK97Wkk0nEeMw3BAom
 project: hacker-house-medellin
 allow_lazy_start: false
+source:
+  repository: https://github.com/hacker-house-medellin/hhm-monorepo.git
+  commit: a90a040fad11724e19df9f571add17741d8ca853
+  checkout_dir: .ores/sources/hhm-monorepo
 # Requires ORESoftware/ores-compose#156. Configure ORES_LOCAL_OBJECT_ACCESS_KEY,
 # ORES_LOCAL_OBJECT_SECRET_KEY and ORES_LOCAL_MC_HOST in project-root .env.
 services:
