@@ -10,12 +10,22 @@
     "verify": "npm run lint && npm test && npm run deploy:dry",
     "dev": "wrangler dev",
     "deploy": "wrangler deploy",
-    "deploy:dry": "wrangler deploy --dry-run"
+    "deploy:dry": "wrangler deploy --dry-run",
+    "lint:ores": "if [ -f ../.ores-lint/lint.sh ]; then sh ../.ores-lint/lint.sh; else echo 'ores-lint not installed'; fi",
+    "prepublishOnly": "npm run lint:ores"
   },
   "devDependencies": {
     "wrangler": "4.120.0"
   },
   "engines": {
     "node": ">=22.12.0"
+  },
+  "oresLint": {
+    "note": "Declared, not installed. ores-lint resolves these from a global install - see .ores-lint/README.md",
+    "requires": {
+      "eslint": ">=9",
+      "typescript-eslint": ">=8 (optional; without it .ts files are skipped)"
+    },
+    "install": "npm i -g eslint typescript-eslint"
   }
 }
