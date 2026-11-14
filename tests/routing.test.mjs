@@ -23,6 +23,21 @@ const productionRuntimeSecrets = await readFile(
   "utf8",
 );
 
+test("public routing catalogs forbid duplicate host and route entries", () => {
+  assert.equal(hosts.size, contract.hosts.length, "duplicate host can shadow another entry");
+  for (const entry of contract.hosts) {
+    for (const field of ["routes", "allowed_routes", "websocket_routes"]) {
+      if (Array.isArray(entry[field])) {
+        assert.equal(
+          new Set(entry[field]).size,
+          entry[field].length,
+          `duplicate ${field} in ${entry.hostname}`,
+        );
+      }
+    }
+  }
+});
+
 test("admin traffic has no public hostname or edge entrypoint", () => {
   assert.equal(contract.origin_policy.direct_public_origin, false);
   assert.equal(contract.origin_policy.admin_entrypoint, "private-network-only");
