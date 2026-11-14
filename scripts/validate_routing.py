@@ -54,7 +54,13 @@ expected_hosts = {
     "api.hhaus.org",
 }
 by_host = {entry["hostname"]: entry for entry in HOSTS["hosts"]}
+require(len(by_host) == len(HOSTS["hosts"]), "duplicate hostname entries are forbidden")
 require(set(by_host) == expected_hosts, "public hostname contract must exclude admin hosts")
+for hostname, entry in by_host.items():
+    for field in ("routes", "allowed_routes", "websocket_routes"):
+        if field in entry:
+            routes = entry[field]
+            require(len(set(routes)) == len(routes), f"duplicate {field} on {hostname}")
 
 edge_contract = HOSTS["cloudflare_edge_contract"]
 require(edge_contract["minimum_tls_version"] == "1.2", "Cloudflare minimum TLS must remain 1.2")
@@ -172,6 +178,7 @@ expected_websockets = {
     ("api.hhaus.org", "/v1/realtime", "http://hhm-api.hhm.svc.cluster.local:8080"),
 }
 actual_websockets = {(route["host"], route["path"], route["upstream"]) for route in transport_ws["routes"]}
+require(len(transport_ws["routes"]) == len(actual_websockets), "duplicate public WebSocket route entries are forbidden")
 require(actual_websockets == expected_websockets, "public WebSocket routes or upstreams changed")
 for _, path, upstream in expected_websockets:
     block = nginx_location(nginx, path)
